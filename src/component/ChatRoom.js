@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
-import axios from "axios";
+import axios from "axios";  
+import SideBarCard from "./sideBarCard/SideBarCard";
+
 
 var stompClient = null;  
 var selectedUserId = null; 
@@ -150,7 +152,7 @@ const ChatRoom = () => {
                   }}
                   key={index}
                 >
-                  {ele.fullName}
+                   <SideBarCard name= {ele.fullName}/>
                 </li>
               ))}
             </ul>

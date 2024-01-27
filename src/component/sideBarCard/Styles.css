@@ -1,0 +1,15 @@
+.side-bar-card-container{ 
+    width: 12em;
+    height: 2em;
+    padding: 0.3em; 
+    background: lavender;
+    margin-top: 0.3em;
+    text-align: -webkit-center;
+    box-sizing: border-box;
+    border-radius: 0.7em 0.7em;
+}
+.side-bar-card-container:hover{ 
+
+    background: rgb(110, 110, 199);
+
+}
