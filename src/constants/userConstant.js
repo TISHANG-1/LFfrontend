@@ -1,0 +1,3 @@
+export const USER_LOGIN_GOOGLE_AUTH = "USER_LOGIN"; 
+export const USER_LOGOUT_GOOGLE_AUTH ="USER_LOGOUT" ;  
+export const USER_AUTH_ERROR = "USER_AUTH_ERROR" ; 

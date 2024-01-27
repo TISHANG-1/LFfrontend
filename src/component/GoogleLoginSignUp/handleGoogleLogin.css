@@ -1,0 +1,17 @@
+.google-login-div{
+    /* height: 100vh;
+    width: 100vw;   */ 
+    height: 60vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+ 
+.google-login-div-2 {
+    padding: 2em;
+    /* border: 1em solid #ccc; */
+    border-radius: 2em; 
+    background-color: #fff;
+    box-shadow: 0 2em 5em rgba(0, 0, 0, 0.1);;
+  }
+  
