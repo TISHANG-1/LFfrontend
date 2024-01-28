@@ -5,13 +5,13 @@ import axios from "axios";
 import SideBarCard from "./sideBarCard/SideBarCard";
 import { useSelector } from "react-redux";
 
-var stompClient = null;
+var stompClient = null; 
 var selectedUserId = null;  
 var prefix = "https://lfbackend.onrender.com" ; 
 const ChatRoom = () => {
   const { authData, loading } = useSelector((state) => state.authData);
   const [onlineUser, setOnlineUser] = useState(["CHATROOM"]);
-  const [tab, setTab] = useState("CHATROOM");
+  const [tab, setTab] = useState("No Current Tab");
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [nickname, setNickname] = useState("");
@@ -205,14 +205,13 @@ const ChatRoom = () => {
           <div className="member-list">
             <ul>
               <li
-                onClick={() => {
-                  setTab("CHATROOM"); 
-                  setNickname("CHATROOM") ; 
-                }}
-                className={`member ${tab === "CHATROOM" && "active"}`}
-              >
-                Chatroom
+                 
+                className= "member active"
+              > 
+              { tab } 
               </li>
+              <li   
+                className= "member active"> Online Users List </li>
               {onlineUser?.map((ele, index) => (
                 <li
                   onClick={async () => {
@@ -225,46 +224,8 @@ const ChatRoom = () => {
               ))}
             </ul>
           </div>
-          {tab === "CHATROOM" && (
-            <div className="chat-content">
-              <ul className="chat-messages">
-                {messages.map((chat, index) => (
-                  <li
-                    className={`message ${
-                      chat.senderId === nickname && "self"
-                    }`}
-                    key={index}
-                  >
-                    {chat.senderId !== nickname && (
-                      <div className="avatar">{chat.senderId}</div>
-                    )}
-                    <div className="message-data">{chat.content}</div>
-                    {chat.senderId === userData.username && (
-                      <div className="avatar self">{chat.senderId}</div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="send-message">
-                <input
-                  type="text"
-                  className="input-message"
-                  placeholder="enter the message"
-                  value={messageInput}
-                  onChange={handleMessage}
-                />
-                <button
-                  type="button"
-                  className="send-button"
-                  onClick={sendChatMessage}
-                >
-                  send
-                </button>
-              </div>
-            </div>
-          )}
-          {tab !== "CHATROOM" && (
+          
+          { (
             <div className="chat-content">
               <ul className="chat-messages">
                 {messages?.map((chat, index) => (
@@ -275,9 +236,17 @@ const ChatRoom = () => {
                     key={index}
                   >
                     {chat.senderId !== nickname && (
-                      <div className="avatar">{chat.senderId}</div>
+                      <div className="avatar">{chat.senderId}</div> 
+                      
+                    )} 
+                    {chat.senderId === nickname && (
+                      <div className="timestamp">{new Date(chat.timestamp).toISOString().split('T')[0]} {new Date(chat.timestamp).toISOString().split('T')[1].split('.')[0]}</div> 
+                      
                     )}
                     <div className="message-data">{chat.content}</div>
+                    {chat.senderId !== nickname && (
+                      <div className="timestamp">{new Date(chat.timestamp).toISOString().split('T')[0]} {new Date(chat.timestamp).toISOString().split('T')[1].split('.')[0]} </div>
+                    )}
                     {chat.senderId === nickname && (
                       <div className="avatar self">{chat.senderId}</div>
                     )}
