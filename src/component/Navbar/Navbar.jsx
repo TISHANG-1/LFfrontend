@@ -17,7 +17,9 @@ const Navbar = () => {
   const classes = useStyles(); 
   const navigate  = useNavigate() ; 
 
-  const logout = () => {
+  const logout = () => { 
+    
+ 
     dispatch({ type: actionType.USER_LOGOUT_GOOGLE_AUTH });
 
     setUser(null); 

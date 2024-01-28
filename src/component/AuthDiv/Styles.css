@@ -1,0 +1,13 @@
+.auth-div-container { width: 78em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 20em;
+}
+.text-div{ 
+    font-family: 'Josefin Slab';
+    font-size: x-large;
+    width: 30em; 
+    margin: 0.5em; 
+}

@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
-import axios from "axios";  
+import axios from "axios";
 import SideBarCard from "./sideBarCard/SideBarCard";
+import { useSelector } from "react-redux";
 
-
-var stompClient = null;  
-var selectedUserId = null; 
+var stompClient = null;
+var selectedUserId = null;  
+var prefix = "https://lfbackend.onrender.com" ; 
 const ChatRoom = () => {
+  const { authData, loading } = useSelector((state) => state.authData);
   const [onlineUser, setOnlineUser] = useState(["CHATROOM"]);
   const [tab, setTab] = useState("CHATROOM");
-  const [messages, setMessages] = useState([]) ; 
+  const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [nickname, setNickname] = useState("");
   const [userData, setUserData] = useState({
@@ -18,31 +20,73 @@ const ChatRoom = () => {
     recievername: "",
     connected: false,
     message: "",
-  });    
+  });
+  useEffect(() => {
+    if (authData) {
+      setNickname(authData.result.email);
+      setUserData({
+        ...userData,
+        username: authData.result.name,
+        connected: true,
+      });
+      console.log(authData.result.email, nickname);
+      registerUser();
+    } else if(stompClient) {
+      setNickname("");
+      console.log("overhere") ; 
+      stompClient.send(
+        "/app/user/disconnectUser",
+        {},
+        JSON.stringify({
+          nickName: nickname,
+          fullName: userData.username,
+          status: "OFFLINE",
+        })
+      );
+      window.location.reload();
+      setUserData({ ...userData, username: "", connected: false });
+    }
+  }, [authData]);
 
+  // useEffect(()=>{
+  //   if(authData){
+
+  //    setNickname(authData.result.email) ;
+  //    setUserData({...userData , username: authData.result.name , connected:true});
+  //    console.log(authData.result.email , nickname);
+
+  //   }
+  //   else{
+  //       setNickname("") ;
+  //       setUserData({...userData, username:"" , connected:false});
+
+  //   }
+
+  // } , [nickname]) ;
 
   const onError = () => {};
-  
+
   const handleUserName = (e) => {
     const { value } = e.target;
     setUserData({ ...userData, username: value });
     setNickname(value);
-  };  
+  };
 
- 
   const registerUser = () => {
-    let Sock = new SockJS("http://localhost:8080/ws");
+    let Sock = new SockJS(`${prefix}/ws`);
     stompClient = over(Sock);
     stompClient.connect({}, onConnected, onError);
   };
 
   const onConnected = () => {
-    setUserData({ ...userData, connected: true });
-    setNickname(userData.username);
     console.log(nickname, userData.username);
 
     stompClient.subscribe(
-      `/user/${nickname}/queue/messages`,
+      `/user/${authData.result.email}/queue/messages`,
+      onMessageRecieved
+    );
+    stompClient.subscribe(
+      `/user/commonroom@tishang.com/queue/messages`,
       onMessageRecieved
     );
     stompClient.subscribe(`/user/topic`, onMessageRecieved);
@@ -51,8 +95,8 @@ const ChatRoom = () => {
       "/app/user/addUser",
       {},
       JSON.stringify({
-        fullName: userData.username,
-        nickName: nickname,
+        fullName: authData.result.name,
+        nickName: authData.result.email,
         status: "ONLINE",
       })
     );
@@ -62,10 +106,10 @@ const ChatRoom = () => {
   };
 
   const findAndDisplayConnectedUsers = async () => {
-    const connectedUserResponse = await fetch(`http://localhost:8080/users`);
+    const connectedUserResponse = await fetch(`${prefix}/users`);
     let connectedUsers = await connectedUserResponse.json();
     connectedUsers = connectedUsers.filter(
-      (user) => user.username !== userData.username
+      (user) => user.fullName !== authData?.result?.name
     );
     console.log(onlineUser);
     setOnlineUser([...connectedUsers]);
@@ -74,8 +118,29 @@ const ChatRoom = () => {
   };
   const fectchAndDisplayUserChat = async (nickName2) => {
     await axios
-      .get(`http://localhost:8080/messages/${nickname}/${nickName2}`)
+      .get(
+        `${prefix}/messages/${authData.result.email}/${nickName2}`
+      )
       .then(async (response) => {
+        await setMessages(response.data);
+        const userChat = response.data;
+        console.log(userChat);
+        console.log(messages);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // setMessages(userChat) ;
+  }; 
+  const fectchAndDisplayCommonChat = async () => {  
+    console.log("here") ; 
+    await axios
+      .get(
+        `${prefix}/messages/commonroom@tishang.com` 
+      )
+      .then(async (response) => { 
+        console.log(response.data) ; 
         await setMessages(response.data);
         const userChat = response.data;
         console.log(userChat);
@@ -88,6 +153,7 @@ const ChatRoom = () => {
     // setMessages(userChat) ;
   };
 
+
   const sendChatMessage = async (e) => {
     const messageContent = messageInput;
     console.log(messageContent);
@@ -99,9 +165,10 @@ const ChatRoom = () => {
         content: messageInput,
         timestamp: new Date(),
       };
+      setMessageInput("");
 
-      stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-
+      await stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
+      setMessages([...messages, chatMessage]);
       // something to display the message
     }
   };
@@ -109,20 +176,21 @@ const ChatRoom = () => {
   const handleMessage = (e) => {
     const { value } = e.target;
     setMessageInput(value);
-  };   
+  };
 
-  const handleOnclick = async (ele) => {  
-     selectedUserId  = ele.nickName; 
+  const handleOnclick = async (ele) => {
+    selectedUserId = ele.nickName;
     console.log(selectedUserId); // Updated value of selectedUserId
     await fectchAndDisplayUserChat(ele.nickName);
     setTab(ele.fullName);
-   }  
-
+  };
 
   const onMessageRecieved = async (payload) => {
     findAndDisplayConnectedUsers();
-    console.log(tab); 
-    if(selectedUserId) fectchAndDisplayUserChat(selectedUserId);
+    console.log(tab);
+    console.log(selectedUserId); // Updated value of selectedUserId
+    if (selectedUserId && selectedUserId !== "commonroom@tishang.com") fectchAndDisplayUserChat(selectedUserId);
+    else if(selectedUserId)fectchAndDisplayCommonChat() ; 
     console.log(payload.content);
 
     //   if (selectedUserId && selectedUserId ===message.senderId){
@@ -131,28 +199,28 @@ const ChatRoom = () => {
   };
 
   return (
-    <div className="container">  
-
-      {userData.connected ? (
+    <div className="container">
+      {authData?.result?.email ? (
         <div className="chat-box">
           <div className="member-list">
             <ul>
               <li
                 onClick={() => {
-                  // setTab("CHATROOM");
+                  setTab("CHATROOM"); 
+                  setNickname("CHATROOM") ; 
                 }}
                 className={`member ${tab === "CHATROOM" && "active"}`}
               >
                 Chatroom
-              </li>  
+              </li>
               {onlineUser?.map((ele, index) => (
                 <li
-                  onClick={async () => {  
-                    handleOnclick(ele) ; 
+                  onClick={async () => {
+                    handleOnclick(ele);
                   }}
                   key={index}
                 >
-                   <SideBarCard name= {ele.fullName}/>
+                  <SideBarCard name={ele.fullName} />
                 </li>
               ))}
             </ul>
@@ -163,11 +231,11 @@ const ChatRoom = () => {
                 {messages.map((chat, index) => (
                   <li
                     className={`message ${
-                      chat.senderId === userData.username && "self"
+                      chat.senderId === nickname && "self"
                     }`}
                     key={index}
                   >
-                    {chat.senderId !== userData.username && (
+                    {chat.senderId !== nickname && (
                       <div className="avatar">{chat.senderId}</div>
                     )}
                     <div className="message-data">{chat.content}</div>
@@ -202,15 +270,15 @@ const ChatRoom = () => {
                 {messages?.map((chat, index) => (
                   <li
                     className={`message ${
-                      chat.senderId === userData.username && "self"
+                      chat.senderId === nickname && "self"
                     }`}
                     key={index}
                   >
-                    {chat.senderId !== userData.username && (
+                    {chat.senderId !== nickname && (
                       <div className="avatar">{chat.senderId}</div>
                     )}
                     <div className="message-data">{chat.content}</div>
-                    {chat.senderId === userData.username && (
+                    {chat.senderId === nickname && (
                       <div className="avatar self">{chat.senderId}</div>
                     )}
                   </li>
@@ -238,7 +306,7 @@ const ChatRoom = () => {
         </div>
       ) : (
         <div className="register">
-          <input
+          {/* <input
             id="user-name"
             placeholder="Enter your name"
             name="userName"
@@ -248,10 +316,10 @@ const ChatRoom = () => {
           />
           <button type="button" onClick={registerUser}>
             connect
-          </button>
+          </button> */}
+          Session Expired Oops!!! LogOut and Login Again!!
         </div>
-      )}   
-    
+      )}
     </div>
   );
 };
