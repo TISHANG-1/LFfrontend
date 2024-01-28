@@ -185,6 +185,19 @@ const ChatRoom = () => {
     setTab(ele.fullName);
   };
 
+  const handleKeyDown = (event) => {
+    // Check if the pressed key is Enter (key code 13) 
+    console.log("press enter") ;
+    if (event.key === 'Enter') {
+
+      // Prevent the default behavior (e.g., line break in a textarea)
+      event.preventDefault();
+
+      // Call your function to send the chat message
+      sendChatMessage();
+    }
+  };
+
   const onMessageRecieved = async (payload) => {
     findAndDisplayConnectedUsers();
     console.log(tab);
@@ -206,12 +219,12 @@ const ChatRoom = () => {
             <ul>
               <li
                  
-                className= "member active"
+                className= "openTab"
               > 
-              { tab } 
+              Send To: { tab } 
               </li>
               <li   
-                className= "member active"> Online Users List </li>
+                className= "online-user"> Online Users </li>
               {onlineUser?.map((ele, index) => (
                 <li
                   onClick={async () => {
@@ -261,11 +274,13 @@ const ChatRoom = () => {
                   placeholder="enter the message"
                   value={messageInput}
                   onChange={handleMessage}
+                  onKeyDown={handleKeyDown}
                 />
                 <button
                   type="button"
                   className="send-button"
                   onClick={sendChatMessage}
+                  
                 >
                   send
                 </button>

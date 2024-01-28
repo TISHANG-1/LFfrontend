@@ -84,6 +84,18 @@ button{
   width:90%;
  
 }
+.openTab{ 
+  text-decoration: underline;
+  width: 12em;
+  height: 2em;
+  border-style: double;
+  padding: 1em;
+  text-align: center;
+  font-size: 0.9em;
+  border-color: #3f51b54f;
+  font-family: 'Josefin Slab';
+  text-wrap: balance;
+}
 .timestamp{
   font-family: 'Salsa';
   font-size: 0.5em;
@@ -119,7 +131,17 @@ ul {
   background: grey;
   color:#fff;
 }
-
+.online-user{ 
+  padding: 0.5em 1em;
+  border-style: solid;
+  width: 10.6em;
+  font-size: 1em;
+  font-family: math;
+  border-bottom: transparent;
+  border-color: transparent;
+  text-align: center;
+  text-wrap: balance;
+}
 .avatar{
   background-color: cornflowerblue;
   padding: 3px 5px;
