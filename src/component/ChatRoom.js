@@ -7,7 +7,8 @@ import { useSelector } from "react-redux";
 
 var stompClient = null; 
 var selectedUserId = null;  
-var prefix = "https://lfbackend.onrender.com" ; 
+// var prefix = "https://lfbackend.onrender.com" ; // deployed link
+var prefix  = "http://localhost:8080"
 const ChatRoom = () => {
   const { authData, loading } = useSelector((state) => state.authData);
   const [onlineUser, setOnlineUser] = useState(["CHATROOM"]);
