@@ -109,7 +109,7 @@ const ChatRoom = () => {
     const connectedUserResponse = await fetch(`${prefix}/users`);
     let connectedUsers = await connectedUserResponse.json();
     connectedUsers = connectedUsers.filter(
-      (user) => user.fullName !== authData?.result?.name
+      (user) => user.nickName !== authData?.result?.email
     );
     console.log(onlineUser);
     setOnlineUser([...connectedUsers]);
